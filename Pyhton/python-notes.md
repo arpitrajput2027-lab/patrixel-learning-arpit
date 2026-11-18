@@ -97,7 +97,3 @@ finally:
     print("Finished")
 ```
 
-## 8. Next Practical Task
-- Build a `requests`-based public API script that handles network/response errors, extracts relevant fields, and writes clean rows to CSV.
-- Add `README.md`, dependencies, and tests with invalid or unavailable API responses.
-- Never commit `.env` or API credentials.

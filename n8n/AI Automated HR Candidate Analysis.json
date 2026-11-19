@@ -1,0 +1,519 @@
+{
+  "name": "AI Automated HR Candidate Analysis",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Demo CV Submission",
+        "formDescription": "Use synthetic CVs only",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name",
+              "fieldName": "Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "fieldName": "Email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "CV",
+              "fieldType": "file",
+              "fieldName": "CV",
+              "multipleFiles": false,
+              "acceptFileTypes": ".pdf",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bab24c9d-74a1-43aa-80eb-7b09f1f70fb8",
+      "name": "CV Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        112
+      ],
+      "webhookId": "f895840f-cd0d-42d3-967d-fae2a80dc976"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "CV",
+        "options": {}
+      },
+      "id": "ecfcfdac-4c41-40f1-8299-d6ab14128197",
+      "name": "Extract PDF",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Extract phone, city, education, skills, experience from this synthetic CV. Write a 2 sentence summary. Rate the skills and experience 1-10 for demonstration only, and give a short reason. Do not infer missing information. CV: {{ $json.text }}",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "id": "70f4a4c5-66b5-4d7e-bff7-ee02da6ea400",
+      "name": "AI CV Review",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        448,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "beda1640-b0a2-45c2-b569-c6c8d310e67d",
+      "name": "Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        464,
+        336
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "Gateway credits",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\"phone\":\"\",\"city\":\"\",\"education\":\"\",\"skills\":\"\",\"experience\":\"\",\"summary\":\"\",\"score\":5,\"reason\":\"\"}"
+      },
+      "id": "79bf0fd1-bf43-43ad-a2d0-659b49e30c3c",
+      "name": "Structured CV Result",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        592,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "n",
+              "name": "name",
+              "type": "string",
+              "value": "={{ $('CV Form').item.json.Name }}"
+            },
+            {
+              "id": "e",
+              "name": "email",
+              "type": "string",
+              "value": "={{ $('CV Form').item.json.Email }}"
+            },
+            {
+              "id": "c",
+              "name": "city",
+              "type": "string",
+              "value": "={{ $json.output.city }}"
+            },
+            {
+              "id": "p",
+              "name": "phone",
+              "type": "string",
+              "value": "={{ $json.output.phone }}"
+            },
+            {
+              "id": "ed",
+              "name": "education",
+              "type": "string",
+              "value": "={{ $json.output.education }}"
+            },
+            {
+              "id": "sk",
+              "name": "skills",
+              "type": "string",
+              "value": "={{ $json.output.skills }}"
+            },
+            {
+              "id": "ex",
+              "name": "experience",
+              "type": "string",
+              "value": "={{ $json.output.experience }}"
+            },
+            {
+              "id": "su",
+              "name": "summary",
+              "type": "string",
+              "value": "={{ $json.output.summary }}"
+            },
+            {
+              "id": "sc",
+              "name": "score",
+              "type": "number",
+              "value": "={{ $json.output.score }}"
+            },
+            {
+              "id": "r",
+              "name": "reason",
+              "type": "string",
+              "value": "={{ $json.output.reason }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "55e997f2-daf2-45ea-841d-80d9e1352b15",
+      "name": "Prepare Row",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        800,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1KMBbnvR4HM0yuW_GGfaAyl_8_cbh-cJXr-nkE0AQr2s",
+          "mode": "list",
+          "cachedResultName": "Untitled spreadsheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KMBbnvR4HM0yuW_GGfaAyl_8_cbh-cJXr-nkE0AQr2s/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KMBbnvR4HM0yuW_GGfaAyl_8_cbh-cJXr-nkE0AQr2s/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "S. No.",
+              "displayName": "S. No.",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "No. Of Projects",
+              "displayName": "No. Of Projects",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Department",
+              "displayName": "Department",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Project Name",
+              "displayName": "Project Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Software/Hardware",
+              "displayName": "Software/Hardware",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Domain (AI, Robotics, Automation,Energy, Disater management, Agriculture,etc)",
+              "displayName": "Domain (AI, Robotics, Automation,Energy, Disater management, Agriculture,etc)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Faculty Mentor",
+              "displayName": "Faculty Mentor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Faculty Mentor Contact No.",
+              "displayName": "Faculty Mentor Contact No.",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Faculty Mentor email id",
+              "displayName": "Faculty Mentor email id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Student Coordinator",
+              "displayName": "Student Coordinator",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "city",
+              "displayName": "city",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "education",
+              "displayName": "education",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "skills",
+              "displayName": "skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "experience",
+              "displayName": "experience",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "reason",
+              "displayName": "reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "8112264d-8563-46a4-a7d2-136398a6a5d8",
+      "name": "Save to Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1024,
+        112
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "52JWtUDb6CPIwMHS",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "CV Form": {
+      "main": [
+        [
+          {
+            "node": "Extract PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract PDF": {
+      "main": [
+        [
+          {
+            "node": "AI CV Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI CV Review": {
+      "main": [
+        [
+          {
+            "node": "Prepare Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI CV Review",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured CV Result": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI CV Review",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Row": {
+      "main": [
+        [
+          {
+            "node": "Save to Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "e70dd1e9-cf90-4967-9c65-cb16b9fffdbd",
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "templateCredsSetupCompleted": true,
+    "instanceId": "412ced561500423542614f33f16908976232d2c9c0e0bf99517848225e654e90"
+  },
+  "nodeGroups": [],
+  "id": "uUxazJaqRahDRWXu",
+  "tags": []
+}

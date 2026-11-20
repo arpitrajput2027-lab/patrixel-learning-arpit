@@ -12,3 +12,14 @@
 - Use an output parser to return consistent fields.
 - Save the results to Google Sheets.
 - Use synthetic CVs for demos; AI scores should not make hiring decisions.
+
+## Email Summary Agent
+- Reads last 24 hrs email
+- used schedule trigger (7 am)
+- summarize them, and send it to mail
+
+## YT Script genrator
+- Submit the form with topic and Length of the script u want
+- usses a 2 path on for long script and one for short script
+- AI genrates using collecting the info from tavily(web search )
+- saves it to drive in docs
